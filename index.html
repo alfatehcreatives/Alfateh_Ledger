@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asim's Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; overflow-x: hidden; }
+        .note-stack { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .note-stack { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); } }
+        .note-card { border-radius: 2rem; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 15px rgba(0,0,0,0.03); min-height: 160px; }
+        .note-card:hover { transform: translateY(-5px); z-index: 10; box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+        .bg-note-pink { background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%); }
+        .bg-note-purple { background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%); }
+        .bg-note-blue { background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); }
+        .bg-note-dark { background: linear-gradient(135deg, #475569 0%, #1e293b 100%); }
+        .bg-note-teal { background: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%); }
+        
+        .pill-nav-container { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 200; width: fit-content; }
+        .pill-nav { background: #000000; border-radius: 32px; padding: 8px 24px; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .nav-btn { color: #666; padding: 12px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+        .nav-btn.active { color: #ffffff; }
+        .add-btn-pill { background: #ffffff; color: #000000; width: 44px; height: 44px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin: 0 8px; transition: transform 0.2s ease; }
+        .add-btn-pill:active { transform: scale(0.9); }
+
+        .modal-enter { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        #sidebar { transform: translateX(-101%); transition: transform 0.4s cubic-bezier(0.32, 0, 0.07, 1); }
+        #sidebar.open { transform: translateX(0); }
+        .sidebar-overlay { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); }
+        .sidebar-overlay.open { opacity: 1; pointer-events: auto; }
+        #search-bar { height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; }
+        #search-bar.active { height: 64px; opacity: 1; margin-bottom: 1rem; }
+        .main-container { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .premium-card { background: #000000; border: 1px solid rgba(255,255,255,0.08); border-radius: 2.5rem; color: white; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .progress-rail { background: rgba(255,255,255,0.1); height: 6px; border-radius: 99px; overflow: hidden; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col relative">
+
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="sidebar-overlay fixed inset-0 z-[500]"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-[85%] max-w-[320px] bg-white z-[600] flex flex-col shadow-2xl">
+        <div class="p-8 pt-16">
+            <nav class="space-y-3">
+                <button onclick="setView('archive'); toggleSidebar();" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 w-full font-semibold text-slate-600 transition-all">
+                    <i class="fa-solid fa-archive opacity-40"></i><span>Archived Notes</span>
+                </button>
+                <a href="support.html" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 w-full font-semibold text-slate-600 transition-all">
+                    <i class="fa-solid fa-comment-dots opacity-40"></i><span>Support</span>
+                </a>
+                <div class="pt-6">
+                    <a href="Fund_Development.html" class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-zinc-900 text-white font-bold shadow-lg active:scale-95 transition-all">
+                        <i class="fa-solid fa-circle-dollar-to-slot"></i><span>Fund Development</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mt-auto p-8 border-t border-zinc-50">
+            <div class="text-center mb-6">
+                <span class="text-[10px] font-black text-zinc-300 tracking-[0.2em] uppercase">Ledger v3.1.2 Premium</span>
+            </div>
+            <div class="flex gap-4 mb-8 justify-center">
+                <button onclick="exportToCSV()" class="flex flex-col items-center gap-2 group w-20">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-export text-sm"></i></div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">CSV</span>
+                </button>
+                <button onclick="exportToPDF()" class="flex flex-col items-center gap-2 group w-20">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all shadow-sm"><i class="fa-solid fa-file-pdf text-sm"></i></div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">PDF</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <header class="w-full bg-white/80 backdrop-blur-md sticky top-0 z-[100] border-b border-zinc-100">
+        <div class="main-container px-6 py-6 md:py-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 id="header-title" class="text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">Notes</h1>
+                    <p class="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mt-1">Asim's Ledger</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSearch()" class="w-12 h-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 transition-all">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <button onclick="toggleSidebar()" class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white flex flex-col items-center justify-center gap-1.5 border border-zinc-100 shadow-sm hover:shadow-md transition-all active:scale-90">
+                        <div class="w-5 h-0.5 bg-zinc-900 rounded-full"></div>
+                        <div class="w-5 h-0.5 bg-zinc-900 rounded-full"></div>
+                        <div class="w-3 h-0.5 bg-zinc-900 rounded-full self-start ml-3.5 md:ml-4.5"></div>
+                    </button>
+                </div>
+            </div>
+            <div id="search-bar" class="relative mt-4">
+                <input type="text" id="search-input" oninput="render()" placeholder="Search..." class="w-full bg-zinc-100 border-none py-4 px-6 rounded-2xl text-sm focus:ring-2 ring-zinc-200 outline-none">
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full overflow-y-auto no-scrollbar">
+        <div id="content-area" class="main-container px-6 py-8 pb-40"></div>
+    </main>
+
+    <div class="pill-nav-container">
+        <nav class="pill-nav">
+            <button onclick="setView('memos')" class="nav-btn" id="nav-memos"><i class="fa-solid fa-house text-xl"></i></button>
+            <button onclick="setView('ledger')" class="nav-btn" id="nav-ledger"><i class="fa-solid fa-wallet text-xl"></i></button>
+            <button onclick="openModal()" class="add-btn-pill"><i class="fa-solid fa-plus"></i></button>
+            <button onclick="setView('projects')" class="nav-btn" id="nav-projects"><i class="fa-solid fa-chart-simple text-xl"></i></button>
+            <button onclick="setView('dreams')" class="nav-btn" id="nav-dreams"><i class="fa-solid fa-crosshairs text-xl"></i></button>
+        </nav>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden z-[300] items-end md:items-center justify-center p-0 md:p-6">
+        <div class="bg-white w-full max-w-lg rounded-t-[3rem] md:rounded-[3rem] p-8 modal-enter shadow-2xl">
+            <div class="w-12 h-1 bg-zinc-200 rounded-full mx-auto mb-8 md:hidden"></div>
+            <h2 class="text-2xl font-extrabold mb-6" id="modal-title">New Entry</h2>
+            <div id="modal-fields" class="space-y-4"></div>
+            <div class="flex gap-4 mt-8">
+                <button onclick="closeModal()" class="flex-1 py-4 rounded-2xl bg-zinc-100 font-bold text-zinc-500">Cancel</button>
+                <button onclick="saveItem()" class="flex-1 py-4 rounded-2xl bg-zinc-900 text-white font-bold">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="note-viewer" class="fixed inset-0 bg-white hidden z-[400] flex-col">
+        <div class="main-container w-full h-full flex flex-col">
+            <div class="p-6 flex justify-between items-center border-b">
+                <button onclick="closeNote()" class="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
+                <span class="text-[10px] font-black uppercase text-zinc-400" id="view-note-date"></span>
+                <div class="flex gap-3">
+                    <button id="archive-btn" class="w-10 h-10 rounded-xl bg-zinc-50 text-zinc-500"></button>
+                    <button onclick="deleteCurrentNote()" class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 p-8 md:p-12 overflow-y-auto">
+                <h2 id="view-note-title" class="text-3xl md:text-5xl font-black mb-8 leading-tight"></h2>
+                <div id="view-note-body" class="text-zinc-600 leading-relaxed text-lg whitespace-pre-wrap max-w-3xl"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = JSON.parse(localStorage.getItem('asim_ledger_v3')) || { memos: [], ledger: [], projects: [], dreams: [], archivedMemos: [] };
+        let currentView = 'memos';
+        let currentlyViewingIndex = null;
+        let isArchiveView = false;
+        const colors = ['bg-note-pink', 'bg-note-purple', 'bg-note-blue', 'bg-note-dark', 'bg-note-teal'];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
+        }
+
+        function toggleSearch() {
+            const bar = document.getElementById('search-bar');
+            bar.classList.toggle('active');
+            if(bar.classList.contains('active')) document.getElementById('search-input').focus();
+        }
+
+        function saveToLocal() {
+            localStorage.setItem('asim_ledger_v3', JSON.stringify(state));
+            render();
+        }
+
+        function setView(view) {
+            currentView = view;
+            isArchiveView = view === 'archive';
+            const titles = { memos: 'Notes', projects: 'Projects', ledger: 'Spendature', dreams: 'Savings', archive: 'Archive' };
+            document.getElementById('header-title').innerText = titles[view] || 'Notes';
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`nav-${view}`);
+            if(activeBtn) activeBtn.classList.add('active');
+            render();
+        }
+
+        function openNote(idx, fromArchive = false) {
+            currentlyViewingIndex = idx;
+            const note = fromArchive ? state.archivedMemos[idx] : state.memos[idx];
+            document.getElementById('view-note-title').innerText = note.title;
+            document.getElementById('view-note-body').innerText = note.body;
+            document.getElementById('view-note-date').innerText = note.date;
+            const btn = document.getElementById('archive-btn');
+            btn.onclick = () => toggleArchive(idx, fromArchive);
+            btn.innerHTML = fromArchive ? '<i class="fa-solid fa-arrow-up-from-bracket"></i>' : '<i class="fa-solid fa-box-archive"></i>';
+            document.getElementById('note-viewer').classList.remove('hidden');
+            document.getElementById('note-viewer').classList.add('flex');
+        }
+
+        function toggleArchive(idx, fromArchive) {
+            if(fromArchive) {
+                const note = state.archivedMemos.splice(idx, 1)[0];
+                state.memos.unshift(note);
+            } else {
+                const note = state.memos.splice(idx, 1)[0];
+                if(!state.archivedMemos) state.archivedMemos = [];
+                state.archivedMemos.unshift(note);
+            }
+            saveToLocal(); closeNote();
+        }
+
+        function closeNote() { document.getElementById('note-viewer').classList.add('hidden'); document.getElementById('note-viewer').classList.remove('flex'); }
+
+        function deleteCurrentNote() {
+            if(confirm("Permanently delete this note?")) {
+                if(isArchiveView) state.archivedMemos.splice(currentlyViewingIndex, 1);
+                else state.memos.splice(currentlyViewingIndex, 1);
+                saveToLocal(); closeNote();
+            }
+        }
+
+        function render() {
+            const container = document.getElementById('content-area');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            container.innerHTML = '';
+
+            if (currentView === 'memos' || currentView === 'archive') {
+                const list = currentView === 'archive' ? (state.archivedMemos || []) : (state.memos || []);
+                const stack = document.createElement('div');
+                stack.className = 'note-stack';
+                list.forEach((m, i) => {
+                    if (search && !m.title.toLowerCase().includes(search)) return;
+                    stack.innerHTML += `
+                        <div onclick="openNote(${i}, ${currentView === 'archive'})" class="note-card ${colors[i % colors.length]} p-8 text-white cursor-pointer">
+                            <span class="text-[10px] font-bold opacity-70 uppercase">${m.date || ''}</span>
+                            <h3 class="font-bold text-xl mb-2 line-clamp-2">${m.title}</h3>
+                            <p class="text-sm opacity-90 line-clamp-3">${m.body}</p>
+                        </div>`;
+                });
+                container.appendChild(stack);
+            } 
+            else if (currentView === 'dreams') {
+                state.dreams.forEach((d, i) => {
+                    if (search && !d.name.toLowerCase().includes(search)) return;
+                    const progress = Math.min((parseFloat(d.saved || 0) / parseFloat(d.target || 1)) * 100, 100);
+                    container.innerHTML += `
+                        <div class="premium-card mb-6 max-w-2xl mx-auto">
+                            <div class="flex justify-between items-start mb-8"><h3 class="font-black text-2xl tracking-tight">${d.name}</h3><button onclick="deleteItem('dreams', ${i})" class="text-zinc-600 hover:text-white transition-colors"><i class="fa-solid fa-trash-can"></i></button></div>
+                            <div class="flex justify-between items-end mb-8">
+                                <div><p class="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-2">Current Savings</p><p class="text-4xl font-black text-white">${parseFloat(d.saved).toLocaleString()}</p></div>
+                                <div class="text-right"><p class="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-2">Target</p><p class="text-xl font-bold opacity-60">${parseFloat(d.target).toLocaleString()}</p></div>
+                            </div>
+                            <div class="progress-rail mb-10"><div class="bg-white h-full transition-all duration-700" style="width: ${progress}%"></div></div>
+                            <button onclick="updateDream(${i})" class="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Adjust Balance</button>
+                        </div>`;
+                });
+            }
+            else if (currentView === 'projects') {
+                state.projects.forEach((p, i) => {
+                    if (search && !p.name.toLowerCase().includes(search)) return;
+                    let adds = (p.items || []).filter(it => it.type === 'add').reduce((a, b) => a + parseFloat(b.cost || 0), 0);
+                    let subs = (p.items || []).filter(it => it.type === 'sub').reduce((a, b) => a + parseFloat(b.cost || 0), 0);
+                    let rem = (p.budget || 0) + adds - subs;
+                    
+                    let historyHTML = (p.items || []).slice(0, 3).map(it => `
+                        <div class="flex justify-between text-[10px] opacity-60 py-1 border-b border-white/5">
+                            <span class="truncate pr-4">${it.label}</span>
+                            <span class="${it.type === 'add' ? 'text-emerald-400' : 'text-rose-400'}">${it.type === 'add' ? '+' : '-'}${it.cost}</span>
+                        </div>
+                    `).join('');
+
+                    container.innerHTML += `
+                        <div class="premium-card mb-6 max-w-2xl mx-auto">
+                            <div class="flex justify-between mb-8"><h3 class="font-black text-2xl tracking-tight">${p.name}</h3><button onclick="deleteItem('projects', ${i})" class="text-zinc-600 hover:text-white transition-colors"><i class="fa-solid fa-trash-can"></i></button></div>
+                            <div class="grid grid-cols-3 gap-4 text-[10px] font-bold uppercase tracking-widest mb-10 text-center">
+                                <div class="bg-white/5 p-5 rounded-2xl border border-white/5">Base<br><span class="text-white mt-1 block">${p.budget}</span></div>
+                                <div class="bg-white/5 p-5 rounded-2xl border border-white/5">Income<br><span class="text-emerald-400 mt-1 block">+${adds}</span></div>
+                                <div class="bg-white/5 p-5 rounded-2xl border border-white/5">Spend<br><span class="text-rose-400 mt-1 block">-${subs}</span></div>
+                            </div>
+                            ${historyHTML ? `<div class="mb-6 space-y-1">${historyHTML}</div>` : ''}
+                            <div class="flex justify-between mb-3 text-[11px] font-black uppercase tracking-widest text-zinc-500"><span>Running Balance</span><span class="${rem < 0 ? 'text-rose-400' : 'text-white'}">${rem.toLocaleString()}</span></div>
+                            <div class="progress-rail mb-10"><div class="bg-white h-full transition-all duration-700" style="width: ${Math.min((subs/((p.budget||0)+adds||1))*100, 100)}%"></div></div>
+                            <div class="flex gap-4"><button onclick="addProjTx(${i}, 'add')" class="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">+ Fund</button><button onclick="addProjTx(${i}, 'sub')" class="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">- Bill</button></div>
+                        </div>`;
+                });
+            } 
+            else if (currentView === 'ledger') {
+                let inc = state.ledger.reduce((a, b) => b.type === 'income' ? a + parseFloat(b.amount) : a, 0);
+                let exp = state.ledger.reduce((a, b) => b.type === 'expense' ? a + parseFloat(b.amount) : a, 0);
+                container.innerHTML = `
+                    <div class="premium-card mb-8 max-w-2xl mx-auto">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest opacity-40 mb-3">Total Net Worth</p>
+                                <h2 class="text-5xl md:text-6xl font-black tracking-tighter">${(inc - exp).toLocaleString()}</h2>
+                            </div>
+                            <button onclick="exportToPDF()" class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all">
+                                <i class="fa-solid fa-file-pdf"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-12 border-t border-white/5 pt-8">
+                            <div><span class="block text-[10px] opacity-40 uppercase font-black tracking-widest mb-2">Total Inflow</span><span class="text-emerald-400 text-2xl font-black">+${inc.toLocaleString()}</span></div>
+                            <div><span class="block text-[10px] opacity-40 uppercase font-black tracking-widest mb-2">Total Outflow</span><span class="text-rose-400 text-2xl font-black">-${exp.toLocaleString()}</span></div>
+                        </div>
+                    </div>`;
+                const listWrapper = document.createElement('div');
+                listWrapper.className = 'max-w-2xl mx-auto space-y-3';
+                state.ledger.forEach((l, i) => {
+                    if (search && !l.item.toLowerCase().includes(search)) return;
+                    listWrapper.innerHTML += `<div class="flex items-center justify-between p-6 bg-white rounded-3xl border border-zinc-100 shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-center gap-5">
+                            <div class="w-12 h-12 rounded-2xl ${l.type === 'income' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'} flex items-center justify-center text-sm"><i class="fa-solid ${l.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i></div>
+                            <div><span class="block font-extrabold text-zinc-900 text-lg">${l.item}</span><span class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">${l.date}</span></div>
+                        </div>
+                        <div class="flex items-center gap-6"><span class="font-black text-xl ${l.type === 'income' ? 'text-emerald-500' : 'text-zinc-900'}">${l.type === 'income' ? '+' : '-'}${parseFloat(l.amount).toLocaleString()}</span><button onclick="deleteItem('ledger', ${i})" class="text-zinc-200 hover:text-rose-500 transition-colors p-2"><i class="fa-solid fa-trash-can text-sm"></i></button></div>
+                    </div>`;
+                });
+                container.appendChild(listWrapper);
+            }
+        }
+
+        function openModal() {
+            const fields = document.getElementById('modal-fields'), title = document.getElementById('modal-title');
+            fields.innerHTML = ''; const inputCls = "w-full p-5 rounded-2xl bg-zinc-50 border-none font-semibold text-sm outline-none";
+            if (currentView === 'memos' || currentView === 'archive') { title.innerText = "New Note"; fields.innerHTML = `<input id="m-t" placeholder="Subject" class="${inputCls}"><textarea id="m-b" placeholder="Notes..." class="${inputCls} h-40 resize-none"></textarea>`; }
+            else if (currentView === 'dreams') { title.innerText = "Savings Goal"; fields.innerHTML = `<input id="d-n" placeholder="Goal Name" class="${inputCls}"><input id="d-t" type="number" placeholder="Target" class="${inputCls}">`; }
+            else if (currentView === 'projects') { title.innerText = "Project"; fields.innerHTML = `<input id="p-n" placeholder="Project Title" class="${inputCls}"><input id="p-b" type="number" placeholder="Initial Budget" class="${inputCls}">`; }
+            else if (currentView === 'ledger') { title.innerText = "Record"; fields.innerHTML = `<select id="l-t" class="${inputCls}"><option value="expense">Expense (-)</option><option value="income">Income (+)</option></select><input id="l-i" placeholder="Source/Item Title" class="${inputCls}"><input id="l-a" type="number" placeholder="Amount" class="${inputCls}">`; }
+            document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex');
+        }
+
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modal').classList.remove('flex'); }
+
+        function saveItem() {
+            const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            if (currentView === 'memos') { const t = document.getElementById('m-t').value, b = document.getElementById('m-b').value; if (t) state.memos.unshift({ title: t, body: b, date }); }
+            else if (currentView === 'dreams') { const n = document.getElementById('d-n').value, t = document.getElementById('d-t').value; if (n && t) state.dreams.unshift({ name: n, target: parseFloat(t), saved: 0 }); }
+            else if (currentView === 'projects') { const n = document.getElementById('p-n').value, b = document.getElementById('p-b').value; if (n) state.projects.unshift({ name: n, budget: parseFloat(b) || 0, items: [] }); }
+            else if (currentView === 'ledger') { const i = document.getElementById('l-i').value, a = document.getElementById('l-a').value, t = document.getElementById('l-t').value; if (i && a) state.ledger.unshift({ item: i, amount: a, type: t, date }); }
+            saveToLocal(); closeModal();
+        }
+
+        function updateDream(idx) { const amount = prompt("Current saved amount?"); if (amount !== null && !isNaN(amount)) { state.dreams[idx].saved = parseFloat(amount); saveToLocal(); } }
+        
+        function addProjTx(idx, type) { 
+            const label = prompt(type === 'add' ? "Source of funding? (Title)" : "Reason for payment? (Title)"); 
+            const cost = prompt("Amount?"); 
+            if (label && cost && !isNaN(cost)) { 
+                if (!state.projects[idx].items) state.projects[idx].items = []; 
+                state.projects[idx].items.unshift({ label, cost: parseFloat(cost), type }); 
+                saveToLocal(); 
+            } 
+        }
+
+        function deleteItem(view, idx) { if(confirm("Delete?")) { state[view].splice(idx, 1); saveToLocal(); } }
+
+        function exportToCSV() {
+            let csv = "Category,Date,Description,Amount,Type\n";
+            state.ledger.forEach(l => csv += `Ledger,"${l.date}","${l.item}",${l.amount},${l.type}\n`);
+            csv += "\n\nDeveloped by AlFateh Creative Agency\n";
+            csv += "Please consider funding future development for this ledger.\n";
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `spendature_report.csv`; a.click();
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(22); doc.text("Spendature Ledger", 14, 20);
+            doc.setFontSize(10); doc.text(`Asim's Ledger - Generated: ${new Date().toLocaleString()}`, 14, 28);
+            
+            const rows = state.ledger.map(l => [l.date, l.item, l.type === 'income' ? `+${l.amount}` : `-${l.amount}`]);
+            doc.autoTable({ head: [['Date', 'Description', 'Amount']], body: rows, startY: 35, headStyles: { fillColor: [0, 0, 0] }, theme: 'striped' });
+            
+            const finalY = doc.lastAutoTable.finalY + 15;
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text("Developed by AlFateh Creative Agency", 14, finalY);
+            doc.setFontSize(9);
+            doc.text("Please consider funding future development to keep these tools free and evolving.", 14, finalY + 7);
+            doc.save("spendature_report.pdf");
+        }
+        window.onload = () => setView('memos');
+    </script>
+</body>
+</html>

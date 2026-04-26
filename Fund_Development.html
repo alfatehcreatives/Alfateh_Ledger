@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fund Development - Alfateh Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #1e293b; }
+        .premium-border { border-bottom: 1px solid #f1f5f9; }
+        .logo-img { height: 48px; width: 48px; object-fit: contain; }
+        .bank-card {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 2rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="max-w-2xl mx-auto px-6 py-8 md:py-16">
+        <!-- Navigation -->
+        <div class="flex justify-between items-center mb-10">
+            <a href="index.html" class="text-slate-900 hover:opacity-60 transition-all">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Support Development</span>
+        </div>
+
+        <!-- Header -->
+        <header class="mb-12">
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Contribution Portal</h1>
+            <p class="text-slate-500 text-sm font-medium">Professional support for digital growth.</p>
+        </header>
+
+        <!-- Account Info Section -->
+        <div class="premium-border pb-10 mb-10">
+            <div class="flex flex-col gap-6">
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 block mb-1">Account Title</span>
+                    <h2 class="text-2xl font-bold text-slate-900">Muhammad Asim Lone</h2>
+                </div>
+
+                <div class="flex items-center gap-8 py-2">
+                    <img src="raast.png" alt="Raast" class="logo-img">
+                    <img src="jazzcash.png" alt="JazzCash" class="logo-img">
+                    <img src="easypaisa.png" alt="EasyPaisa" class="logo-img">
+                </div>
+
+                <!-- Wallet Number -->
+                <div class="flex items-center justify-between p-5 rounded-3xl bg-slate-50 border border-slate-100">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Wallet / Raast ID</span>
+                        <span class="text-xl font-black text-slate-900 tracking-tight">03285950885</span>
+                    </div>
+                    <button onclick="copyToClipboard('03285950885')" class="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all active:scale-90 border border-slate-100">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Details Section -->
+        <div class="space-y-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-1 h-5 bg-black rounded-full"></div>
+                <h3 class="text-sm font-black uppercase tracking-widest text-slate-900">Bank Transfer</h3>
+            </div>
+
+            <div class="bank-card p-8">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Bank Name</p>
+                            <p class="text-lg font-extrabold text-slate-900">Raqami Islamic Bank/Savings account</p>
+                        </div>
+                        <i class="fa-solid fa-building-columns text-slate-200 text-2xl"></i>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Account Number</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-lg font-black text-slate-900 tracking-wider">029317653258</p>
+                            <button onclick="copyToClipboard('029317653258')" class="text-slate-400 hover:text-black">
+                                <i class="fa-solid fa-copy text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">IBAN Number</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-bold text-slate-900 tracking-tight">PK65 RQMI 0000 0293 1765 3258</p>
+                            <button onclick="copyToClipboard('PK65 RQMI 0000 0293 1765 32580')" class="text-slate-400 hover:text-black">
+                                <i class="fa-solid fa-copy text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-24 pt-10 border-t border-slate-50 text-center">
+            <p class="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">Alfateh Ledger Development Funds</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-8 py-4 rounded-2xl text-xs font-bold opacity-0 transition-all pointer-events-none z-50 shadow-2xl">
+        Copied to Clipboard
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            const toast = document.getElementById('toast');
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, -10px)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 0px)';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
