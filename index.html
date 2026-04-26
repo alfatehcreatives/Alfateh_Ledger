@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asim's Ledger</title>
+    <title>Alfateh's Ledger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -91,7 +91,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h1 id="header-title" class="text-3xl md:text-4xl font-extrabold text-zinc-900 tracking-tight">Notes</h1>
-                    <p class="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mt-1">Asim's Ledger</p>
+                    <p class="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mt-1">Alfateh's Ledger</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="toggleSearch()" class="w-12 h-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-zinc-50 transition-all">
@@ -379,7 +379,7 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.setFontSize(22); doc.text("Spendature Ledger", 14, 20);
-            doc.setFontSize(10); doc.text(`Asim's Ledger - Generated: ${new Date().toLocaleString()}`, 14, 28);
+            doc.setFontSize(10); doc.text(`Alfateh's Ledger - Generated: ${new Date().toLocaleString()}`, 14, 28);
             
             const rows = state.ledger.map(l => [l.date, l.item, l.type === 'income' ? `+${l.amount}` : `-${l.amount}`]);
             doc.autoTable({ head: [['Date', 'Description', 'Amount']], body: rows, startY: 35, headStyles: { fillColor: [0, 0, 0] }, theme: 'striped' });
