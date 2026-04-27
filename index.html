@@ -368,7 +368,7 @@
         function exportToCSV() {
             let csv = "Category,Date,Description,Amount,Type\n";
             state.ledger.forEach(l => csv += `Ledger,"${l.date}","${l.item}",${l.amount},${l.type}\n`);
-            csv += "\n\nDeveloped by AlFateh Creative Agency\n";
+            csv += "\n\nDeveloped by Alfateh Creative Agency\n";
             csv += "Please consider funding future development for this ledger.\n";
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -387,7 +387,7 @@
             const finalY = doc.lastAutoTable.finalY + 15;
             doc.setFontSize(11);
             doc.setTextColor(100);
-            doc.text("Developed by AlFateh Creative Agency", 14, finalY);
+            doc.text("Developed by Alfateh Creative Agency", 14, finalY);
             doc.setFontSize(9);
             doc.text("Please consider funding future development to keep these tools free and evolving.", 14, finalY + 7);
             doc.save("spendature_report.pdf");
