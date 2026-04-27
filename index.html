@@ -262,7 +262,10 @@
                                 <div class="text-right"><p class="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-2">Target</p><p class="text-xl font-bold opacity-60">${parseFloat(d.target).toLocaleString()}</p></div>
                             </div>
                             <div class="progress-rail mb-10"><div class="bg-white h-full transition-all duration-700" style="width: ${progress}%"></div></div>
-                            <button onclick="updateDream(${i})" class="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Adjust Balance</button>
+                            <div class="flex gap-4">
+                                <button onclick="updateDream(${i}, 'add')" class="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">+ Add Fund</button>
+                                <button onclick="updateDream(${i}, 'set')" class="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Set Total</button>
+                            </div>
                         </div>`;
                 });
             }
@@ -351,7 +354,18 @@
             saveToLocal(); closeModal();
         }
 
-        function updateDream(idx) { const amount = prompt("Current saved amount?"); if (amount !== null && !isNaN(amount)) { state.dreams[idx].saved = parseFloat(amount); saveToLocal(); } }
+        function updateDream(idx, mode = 'set') { 
+            const msg = mode === 'add' ? "Amount to add to savings?" : "Current total saved amount?";
+            const val = prompt(msg); 
+            if (val !== null && !isNaN(val) && val !== "") { 
+                if (mode === 'add') {
+                    state.dreams[idx].saved = (parseFloat(state.dreams[idx].saved) || 0) + parseFloat(val);
+                } else {
+                    state.dreams[idx].saved = parseFloat(val); 
+                }
+                saveToLocal(); 
+            } 
+        }
         
         function addProjTx(idx, type) { 
             const label = prompt(type === 'add' ? "Source of funding? (Title)" : "Reason for payment? (Title)"); 
