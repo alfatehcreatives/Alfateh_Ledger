@@ -31,28 +31,28 @@
   "screenshots": [
     {
       "src": "ss1.jpg",
-      "sizes": "1080x1920",
+      "sizes": "1080x2460",
       "type": "image/jpeg",
       "platform": "narrow",
       "label": "Notes"
     },
     {
       "src": "ss2.jpg",
-      "sizes": "1080x1920",
+      "sizes": "1080x2460",
       "type": "image/jpeg",
       "platform": "narrow",
       "label": "Finance Tracking"
     },
     {
       "src": "ss3.jpg",
-      "sizes": "1080x1920",
+      "sizes": "1080x2460",
       "type": "image/jpeg",
       "platform": "narrow",
       "label": "Project Management"
     },
     {
       "src": "ss4.jpg",
-      "sizes": "1080x1920",
+      "sizes": "1080x2460",
       "type": "image/jpeg",
       "platform": "narrow",
       "label": "Savings Page"
