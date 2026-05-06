@@ -1,16 +1,18 @@
 {
   "name": "Alfateh Ledger",
   "short_name": "Ledger",
-  "start_url": "index.html",
+  "description": "Premium personal finance and note management.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "description": "Premium personal finance and note management.",
   "icons": [
     {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/jpeg",
+      "src": "maskicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
     },
     {
@@ -20,10 +22,40 @@
       "purpose": "maskable"
     },
     {
-      "src": "maskicon.png",
-      "sizes": "192x192",
+      "src": "icon.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "ss1.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Dashboard View"
+    },
+    {
+      "src": "ss2.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Finance Tracking"
+    },
+    {
+      "src": "ss3.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Note Management"
+    },
+    {
+      "src": "ss4.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Settings Page"
     }
   ]
 }
