@@ -34,7 +34,7 @@
       "sizes": "1080x1920",
       "type": "image/jpeg",
       "platform": "narrow",
-      "label": "Dashboard View"
+      "label": "Notes"
     },
     {
       "src": "ss2.jpg",
@@ -48,14 +48,14 @@
       "sizes": "1080x1920",
       "type": "image/jpeg",
       "platform": "narrow",
-      "label": "Note Management"
+      "label": "Project Management"
     },
     {
       "src": "ss4.jpg",
       "sizes": "1080x1920",
       "type": "image/jpeg",
       "platform": "narrow",
-      "label": "Settings Page"
+      "label": "Savings Page"
     }
   ]
 }
