@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.alfatehcreatives.twa",
+        "sha256_cert_fingerprints": ["F9:CA:D6:CF:3A:9A:7C:7D:A9:0E:76:46:21:B9:B0:7A:9A:78:34:27:7B:0A:3C:DB:BA:B4:83:94:E2:F8:02:28"]
+      }
+    }]
